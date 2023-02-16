@@ -30,6 +30,17 @@ function isNonBlankString(str) {
 }
 
 /**
+ * Given a DOM element, return it's parent node or host
+ * when it's a web component
+ *
+ * @param {Element} el
+ *        A DOM element.
+ */
+function getItemParent(item) {
+  return item.parentNode || item.host;
+}
+
+/**
  * Throws an error if the passed string has whitespace. This is used by
  * class methods to be relatively consistent with the classList API.
  *
@@ -566,7 +577,16 @@ export function getPointerPosition(el, event) {
     while (item && item.nodeName.toLowerCase() !== 'html') {
       const transform = computedStyle(item, 'transform');
 
-      if (/^matrix/.test(transform)) {
+      // Support Web component where the parentNode is host instead
+      const parent = getItemParent(item);
+
+      if (parent && parent.shadowRoot) {
+        // Use current offset left and right instead of transform
+        // because slotted element parent with transform won't be
+        // visible with the search
+        translated.x -= (item.offsetLeft || 0);
+        translated.x += (item.offsetRight || 0);
+      } else if (/^matrix/.test(transform)) {
         const values = transform.slice(7, -1).split(/,\s/).map(Number);
 
         translated.x += values[4];
@@ -577,8 +597,7 @@ export function getPointerPosition(el, event) {
         translated.x += values[12];
         translated.y += values[13];
       }
-
-      item = item.parentNode;
+      item = parent;
     }
   }
 

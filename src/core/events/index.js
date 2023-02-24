@@ -18,13 +18,15 @@ const events = (swiper, method) => {
   const domMethod = method === 'on' ? 'addEventListener' : 'removeEventListener';
   const swiperMethod = method;
 
+  const passiveListener = params.passiveListeners ? { passive: true } : false;
+
   // Touch Events
   el[domMethod]('pointerdown', swiper.onTouchStart, { passive: false });
   document[domMethod]('pointermove', swiper.onTouchMove, { passive: false, capture });
-  document[domMethod]('pointerup', swiper.onTouchEnd, { passive: true });
-  document[domMethod]('pointercancel', swiper.onTouchEnd, { passive: true });
-  document[domMethod]('pointerout', swiper.onTouchEnd, { passive: true });
-  document[domMethod]('pointerleave', swiper.onTouchEnd, { passive: true });
+  document[domMethod]('pointerup', swiper.onTouchEnd, passiveListener);
+  document[domMethod]('pointercancel', swiper.onTouchEnd, passiveListener);
+  document[domMethod]('pointerout', swiper.onTouchEnd, passiveListener);
+  document[domMethod]('pointerleave', swiper.onTouchEnd, passiveListener);
 
   // Prevent Links Clicks
   if (params.preventClicks || params.preventClicksPropagation) {
